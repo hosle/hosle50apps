@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Woodlands Checkpoint - Live traffic camera feeds from Woodlands Causeway. Check traffic conditions before your journey between Singapore and Johor Bahru.">
+  <meta name="keywords" content="Woodlands Checkpoint, Singapore, Malaysia, Johor, traffic, causeway, camera, live feed">
+  <meta name="theme-color" content="#1a5c38">
+  <title>Woodlands Checkpoint - Live Traffic Camera App</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="app_icon.png">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #1a5c38;
+      --primary-light: #2d8a56;
+      --primary-dark: #0f3d25;
+      --accent: #ffc107;
+      --accent-light: #ffe082;
+      --surface: #f0f7f3;
+      --surface-dark: #1a1f1c;
+      --text-primary: #0d1f15;
+      --text-secondary: #4a6355;
+      --text-light: #f5faf7;
+      --gradient-sunset: linear-gradient(135deg, #ff6b6b 0%, #ffc371 50%, #87ceeb 100%);
+      --gradient-primary: linear-gradient(135deg, #1a5c38 0%, #2d8a56 50%, #4ade80 100%);
+      --shadow-soft: 0 4px 24px rgba(26, 92, 56, 0.12);
+      --shadow-strong: 0 12px 48px rgba(26, 92, 56, 0.2);
+      --radius-sm: 12px;
+      --radius-md: 20px;
+      --radius-lg: 32px;
+      --radius-xl: 48px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--surface);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Animated Background */
+    .hero {
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(77, 173, 128, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(255, 193, 7, 0.1) 0%, transparent 50%),
+        linear-gradient(180deg, #e8f5ec 0%, #f0f7f3 50%, #fff 100%);
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: 
+        radial-gradient(circle at 30% 40%, rgba(45, 138, 86, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 70% 60%, rgba(255, 193, 7, 0.06) 0%, transparent 40%);
+      animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(2%, 3%) rotate(1deg); }
+      66% { transform: translate(-1%, -2%) rotate(-1deg); }
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(26, 92, 56, 0.1);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .nav-brand img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    /* Hero Content */
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 900px;
+      margin-top: 4rem;
+    }
+
+    .app-icon {
+      width: 140px;
+      height: 140px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-strong);
+      margin-bottom: 2rem;
+      animation: bounceIn 0.8s ease-out;
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      60% { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+      font-weight: 400;
+    }
+
+    /* Store Buttons */
+    .store-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    .store-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1.75rem;
+      background: var(--surface-dark);
+      color: var(--text-light);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid transparent;
+    }
+
+    .store-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-strong);
+      background: var(--primary-dark);
+    }
+
+    .store-btn svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .store-btn-text {
+      text-align: left;
+    }
+
+    .store-btn-text small {
+      display: block;
+      font-size: 0.7rem;
+      opacity: 0.8;
+      font-weight: 400;
+    }
+
+    .store-btn-text span {
+      display: block;
+      font-size: 1.1rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    /* App Previews Container */
+    .app-previews {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      align-items: flex-start;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    /* App Preview */
+    .app-preview {
+      position: relative;
+      animation: floatPreview 4s ease-in-out infinite;
+    }
+
+    .app-preview:nth-child(2) {
+      animation-delay: -2s;
+    }
+
+    @keyframes floatPreview {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .app-preview .preview-image {
+      width: 260px;
+      height: auto;
+      max-height: 520px;
+      object-fit: contain;
+      border-radius: 24px;
+      box-shadow: var(--shadow-strong);
+    }
+
+    .preview-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .phone-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .phone-frame.android {
+      border-radius: 28px;
+    }
+
+    .phone-frame.android .phone-screen {
+      border-radius: 20px;
+    }
+
+    /* Features Section */
+    .features {
+      padding: 6rem 2rem;
+      background: white;
+    }
+
+    .section-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .section-tag {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: rgba(26, 92, 56, 0.1);
+      color: var(--primary);
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+
+    .section-desc {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      padding: 2rem;
+      border-radius: var(--radius-md);
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-soft);
+      border-color: rgba(26, 92, 56, 0.2);
+    }
+
+    .feature-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .feature-icon svg {
+      width: 28px;
+      height: 28px;
+      color: white;
+    }
+
+    .feature-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+
+    .feature-desc {
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* About Section */
+    .about {
+      padding: 6rem 2rem;
+      background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary) 100%);
+      color: white;
+    }
+
+    .about .section-title {
+      color: white;
+    }
+
+    .about .section-desc {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .about-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      margin-top: 3rem;
+    }
+
+    @media (max-width: 768px) {
+      .about-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+    }
+
+    .about-text h3 {
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .about-text p {
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+    }
+
+    .about-stats {
+      display: flex;
+      gap: 3rem;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .about-stats {
+        justify-content: center;
+      }
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .about-visual {
+      display: flex;
+      justify-content: center;
+    }
+
+    .causeway-illustration {
+      width: 100%;
+      max-width: 400px;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(10px);
+    }
+
+    /* Footer */
+    .footer {
+      padding: 3rem 2rem;
+      background: var(--surface-dark);
+      color: var(--text-light);
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .footer-brand img {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+    }
+
+    .footer-brand-text h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .footer-brand-text p {
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .footer-links a {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    .footer-copy {
+      width: 100%;
+      text-align: center;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      opacity: 0.6;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+
+      .hero {
+        padding: 1.5rem;
+        padding-top: 5rem;
+      }
+
+      .app-previews {
+        gap: 1rem;
+      }
+
+      .app-preview .preview-image {
+        width: 160px;
+        max-height: 320px;
+      }
+
+      .store-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .store-btn {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .footer-links {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+    }
+
+    /* Animations */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeUp 0.8s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <a href="#" class="nav-brand">
+      <img src="app_icon.png" alt="App Icon" width="40" height="40" style="border-radius: 10px;">
+      Woodlands Checkpoint
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="privacy-policy.html">Privacy</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <img 
+        src="app_icon.png" 
+        alt="Woodlands Checkpoint App Icon" 
+        class="app-icon fade-up"
+      >
+      <h1 class="hero-title fade-up delay-1">Check Traffic Before<br>You Cross</h1>
+      <p class="hero-subtitle fade-up delay-2">
+        Real-time traffic camera feeds from Woodlands Checkpoint. Plan your journey between Singapore and Johor Bahru with live updates.
+      </p>
+      
+      <div class="store-buttons fade-up delay-3">
+        <a href="https://apps.apple.com/app/woodlands-checkpoint/id6738972959" class="store-btn" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+          </svg>
+          <div class="store-btn-text">
+            <small>Download on the</small>
+            <span>App Store</span>
+          </div>
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.hosle50apps.woodlands_checkpoint_cam" class="store-btn" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 20.5v-17c0-.59.34-1.11.84-1.35L13.69 12l-9.85 9.85c-.5-.24-.84-.76-.84-1.35zm13.81-5.38L6.05 21.34l8.49-8.49 2.27 2.27zm3.35-4.31c.34.27.59.69.59 1.19s-.22.9-.57 1.18l-2.29 1.32-2.5-2.5 2.5-2.5 2.27 1.31zM6.05 2.66l10.76 6.22-2.27 2.27L6.05 2.66z"/>
+          </svg>
+          <div class="store-btn-text">
+            <small>Get it on</small>
+            <span>Google Play</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- App Previews -->
+      <div class="app-previews fade-up delay-4">
+        <!-- iOS Preview -->
+        <div class="app-preview">
+          <img src="assets/ios_preview.png" alt="iOS App Preview" class="preview-image">
+          <div class="preview-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            iOS
+          </div>
+        </div>
+
+        <!-- Android Preview -->
+        <div class="app-preview">
+          <img src="assets/android_preview.jpg" alt="Android App Preview" class="preview-image">
+          <div class="preview-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C13.85 1.23 12.95 1 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31C6.97 3.26 6 5.01 6 7h12c0-1.99-.97-3.75-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/></svg>
+            Android
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="section-container">
+      <div class="section-header">
+        <span class="section-tag">Features</span>
+        <h2 class="section-title">Everything You Need</h2>
+        <p class="section-desc">Simple, fast, and reliable traffic monitoring for your daily commute or weekend trips.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Real-Time Updates</h3>
+          <p class="feature-desc">Camera feeds refresh automatically every 5 minutes, showing you the latest traffic conditions at the checkpoint.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+              <line x1="12" y1="18" x2="12.01" y2="18"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Multiple Views</h3>
+          <p class="feature-desc">Switch between page view for detailed images or list view to quickly scan all camera feeds at once.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Multiple Cameras</h3>
+          <p class="feature-desc">View all checkpoint cameras including approaches from both Singapore and Johor sides of the causeway.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Timestamp Info</h3>
+          <p class="feature-desc">Each image shows exactly when it was captured, so you know how current the traffic situation is.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Lightweight</h3>
+          <p class="feature-desc">Minimal app size and low data usage. Perfect for quick checks before heading out.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Cross Platform</h3>
+          <p class="feature-desc">Available on both iOS and Android. Same great experience on any device.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="about" id="about">
+    <div class="section-container">
+      <div class="section-header">
+        <span class="section-tag" style="background: rgba(255,255,255,0.2);">About</span>
+        <h2 class="section-title">The Busiest Land Crossing</h2>
+        <p class="section-desc">Woodlands Checkpoint handles over 300,000 travelers daily, making it one of the busiest land border crossings in the world.</p>
+      </div>
+
+      <div class="about-content">
+        <div class="about-text">
+          <h3>Plan Smarter, Travel Better</h3>
+          <p>
+            Whether you're commuting daily between Singapore and Johor Bahru, or planning a weekend getaway to Malaysia, checking the traffic before you leave can save you hours of waiting.
+          </p>
+          <p>
+            Our app pulls live camera feeds directly from LTA (Land Transport Authority), giving you accurate, real-time information about traffic conditions at the causeway.
+          </p>
+          <div class="about-stats">
+            <div class="stat">
+              <div class="stat-value">6</div>
+              <div class="stat-label">Camera Feeds</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">5m</div>
+              <div class="stat-label">Auto Refresh</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">24/7</div>
+              <div class="stat-label">Available</div>
+            </div>
+          </div>
+        </div>
+        <div class="about-visual">
+          <div class="causeway-illustration">
+            <svg viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Sky gradient -->
+              <defs>
+                <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#ff9a8b"/>
+                  <stop offset="50%" stop-color="#ffc371"/>
+                  <stop offset="100%" stop-color="#87ceeb"/>
+                </linearGradient>
+                <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#87ceeb"/>
+                  <stop offset="100%" stop-color="#4a9fd4"/>
+                </linearGradient>
+              </defs>
+              
+              <!-- Background -->
+              <rect width="300" height="200" fill="url(#sky)"/>
+              
+              <!-- Water -->
+              <rect y="130" width="300" height="70" fill="url(#water)" opacity="0.8"/>
+              
+              <!-- Causeway/Bridge -->
+              <rect x="0" y="110" width="300" height="25" fill="#888" rx="2"/>
+              <rect x="0" y="115" width="300" height="15" fill="#aaa"/>
+              
+              <!-- Road markings -->
+              <line x1="20" y1="122" x2="40" y2="122" stroke="#fff" stroke-width="3" stroke-dasharray="10,8"/>
+              <line x1="60" y1="122" x2="80" y2="122" stroke="#fff" stroke-width="3"/>
+              <line x1="100" y1="122" x2="120" y2="122" stroke="#fff" stroke-width="3"/>
+              <line x1="140" y1="122" x2="160" y2="122" stroke="#fff" stroke-width="3"/>
+              <line x1="180" y1="122" x2="200" y2="122" stroke="#fff" stroke-width="3"/>
+              <line x1="220" y1="122" x2="240" y2="122" stroke="#fff" stroke-width="3"/>
+              <line x1="260" y1="122" x2="280" y2="122" stroke="#fff" stroke-width="3"/>
+              
+              <!-- Bridge supports -->
+              <rect x="50" y="130" width="8" height="50" fill="#666"/>
+              <rect x="120" y="130" width="8" height="50" fill="#666"/>
+              <rect x="190" y="130" width="8" height="50" fill="#666"/>
+              <rect x="250" y="130" width="8" height="50" fill="#666"/>
+              
+              <!-- Cars -->
+              <g transform="translate(30, 105)">
+                <rect width="25" height="12" fill="#ffc107" rx="3"/>
+                <circle cx="6" cy="12" r="4" fill="#333"/>
+                <circle cx="19" cy="12" r="4" fill="#333"/>
+              </g>
+              <g transform="translate(80, 105)">
+                <rect width="25" height="12" fill="#e74c3c" rx="3"/>
+                <circle cx="6" cy="12" r="4" fill="#333"/>
+                <circle cx="19" cy="12" r="4" fill="#333"/>
+              </g>
+              <g transform="translate(130, 105)">
+                <rect width="25" height="12" fill="#3498db" rx="3"/>
+                <circle cx="6" cy="12" r="4" fill="#333"/>
+                <circle cx="19" cy="12" r="4" fill="#333"/>
+              </g>
+              <g transform="translate(200, 105)">
+                <rect width="25" height="12" fill="#2ecc71" rx="3"/>
+                <circle cx="6" cy="12" r="4" fill="#333"/>
+                <circle cx="19" cy="12" r="4" fill="#333"/>
+              </g>
+              
+              <!-- Labels -->
+              <text x="20" y="30" fill="#fff" font-family="Outfit" font-weight="600" font-size="14">JOHOR</text>
+              <text x="230" y="30" fill="#fff" font-family="Outfit" font-weight="600" font-size="14">SINGAPORE</text>
+              
+              <!-- Arrow -->
+              <path d="M140 70 L160 70 L150 85 Z" fill="#fff" opacity="0.8"/>
+              <path d="M160 50 L140 50 L150 35 Z" fill="#fff" opacity="0.8"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <img src="app_icon.png" alt="App Icon" width="48" height="48" style="border-radius: 12px;">
+        <div class="footer-brand-text">
+          <h4>Woodlands Checkpoint</h4>
+          <p>Live Traffic Camera App</p>
+        </div>
+      </div>
+      
+      <div class="footer-links">
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="mailto:hofotogo@gmail.com">Contact</a>
+        <a href="https://apps.apple.com/app/woodlands-checkpoint/id6738972959" target="_blank">App Store</a>
+        <a href="https://play.google.com/store/apps/details?id=com.hosle50apps.woodlands_checkpoint_cam" target="_blank">Google Play</a>
+      </div>
+      
+      <p class="footer-copy">© 2025 Woodlands Checkpoint App. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Simple intersection observer for scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Fallback: Make all elements visible after a short delay in case observer doesn't work
+    setTimeout(() => {
+      document.querySelectorAll('.feature-card, .about-text, .about-visual').forEach(el => {
+        if (el.style.opacity === '0') {
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }
+      });
+    }, 1500);
+
+    document.querySelectorAll('.feature-card, .about-text, .about-visual').forEach((el, index) => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+      el.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+      observer.observe(el);
+    });
+
+    // Trigger observer immediately for elements already in view
+    setTimeout(() => {
+      window.dispatchEvent(new Event('scroll'));
+    }, 100);
+  </script>
+</body>
+</html>
+
